@@ -1,0 +1,429 @@
+##make an array containing names of directories containing samples
+sample_arr=( $(ls /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/) )
+
+for i in ${sample_arr[@]}; do
+#for i in ${sample_arr[0]}; do
+
+echo '# Annotates whole vcf with custom in heritance and quality filter encoded in /home/scoyou/projects/andreas_OImin/scripts/slivar-functions_bespoke.js
+/share/ScratchGeneral/scoyou/local/bin/slivar/slivar expr \
+--vcf /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/andzan_all_decomp_norm_VEP_vcfanno.vcf.gz \
+--ped /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_ped.txt \
+--gnotate /share/ScratchGeneral/scoyou/projects/andreas_OImin/gnomad_slivar/gnomad.hg37.zip \
+--gnotate /share/ScratchGeneral/scoyou/projects/andreas_OImin/spliceAI_slivar/spliceai.hg37.zip \
+--js /home/scoyou/projects/andreas_OImin/scripts/slivar-functions_bespoke.js \
+--family-expr "filter_pass:filter_pass(variant)" \
+--family-expr "not_problematic:not_problematic(INFO)" \
+--family-expr "impactful_variants:impactful_variants(INFO)" \
+--family-expr "hq_all:fam.every(hq_all)" \
+--family-expr "hq_affected:fam.every(hq_affected)" \
+--family-expr "hq_any_affected:fam.some(hq_any_affected)" \
+--family-expr "rare:fam.some(rare)" \
+--family-expr "rare_ch:fam.some(rare_ch)" \
+--family-expr "hq_rare:fam.some(hq_rare)" \
+--family-expr "hq_rare_ch:fam.some(hq_rare_ch)" \
+--family-expr "hq_rare_impactful:fam.some(hq_rare_impactful)" \
+--family-expr "hq_rare_ch_impactful:fam.some(hq_rare_ch_impactful)" \
+--family-expr "affected_auto_dominant:fam.every(affected_auto_dominant)" \
+--family-expr "affected_auto_recessive:fam.every(affected_auto_recessive)" \
+--family-expr "affected_x_dominant:fam.every(affected_x_dominant)" \
+--family-expr "affected_x_recessive:fam.every(affected_x_recessive)" \
+--trio "trio_rare:trio_rare(kid, INFO)" \
+--trio "trio_interesting:trio_interesting(kid, dad, mom)" \
+--trio "trio_hq_rare:trio_hq_rare(kid, INFO)" \
+--trio "trio_hq_rare_impactful:trio_hq_rare_impactful(kid, INFO)" \
+--trio "trio_hq_rare_interesting:trio_hq_rare_interesting(kid, dad, mom, INFO)" \
+--trio "trio_hq_rare_impactful_interesting:trio_hq_rare_impactful_interesting(kid, dad, mom, INFO)" \
+--trio "trio_denovo:trio_denovo(kid, dad, mom)" \
+--trio "trio_autosomal_dominant:trio_autosomal_dominant(kid, dad, mom)" \
+--trio "trio_autosomal_recessive:trio_autosomal_recessive(kid, dad, mom)" \
+--trio "trio_uniparent_disomy:trio_uniparent_disomy(kid, mom, dad)" \
+--trio "trio_x_recessive:trio_x_recessive(kid, dad, mom, variant, INFO)" \
+--trio "trio_lenient_denovo:trio_lenient_denovo(kid, dad, mom, INFO)" \
+--trio "trio_lenient_ar:trio_lenient_ar(kid, dad, mom, INFO)" \
+| bgzip > /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar.vcf.gz
+
+# Converts slivar annotated vcf to tsv and filters to those that are high quality and rare.
+/share/ScratchGeneral/scoyou/local/bin/slivar/slivar tsv /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar.vcf.gz \
+--ped /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_ped.txt \
+--csq-field CSQ \
+--sample-field hq_rare \
+--sample-field trio_hq_rare \
+--info-field filter_pass \
+--info-field not_problematic \
+--info-field impactful_variants \
+--info-field hq_all \
+--info-field hq_affected \
+--info-field rare \
+--info-field rare_ch \
+--info-field hq_rare \
+--info-field hq_rare_ch \
+--info-field hq_rare_impactful \
+--info-field hq_rare_ch_impactful \
+--info-field affected_auto_dominant \
+--info-field affected_auto_recessive \
+--info-field affected_x_dominant \
+--info-field affected_x_recessive \
+--info-field trio_rare \
+--info-field trio_interesting \
+--info-field trio_hq_rare \
+--info-field trio_hq_rare_impactful \
+--info-field trio_hq_rare_interesting \
+--info-field trio_hq_rare_impactful_interesting \
+--info-field trio_denovo \
+--info-field trio_autosomal_dominant \
+--info-field trio_autosomal_recessive \
+--info-field trio_uniparent_disomy \
+--info-field trio_x_recessive \
+--info-field trio_lenient_denovo \
+--info-field trio_lenient_ar \
+--info-field CSQ \
+--info-field gnomad_popmax_af \
+--info-field gnomad_popmax_af_filter \
+--info-field gnomad_nhomalt \
+--info-field gnomad_nhomalt_filter \
+--info-field gnomad_popmax_af_controls \
+--info-field gnomad_popmax_af_controls_filter \
+--info-field gnomad_nhomalt_controls \
+--info-field gnomad_nhomalt_controls_filter \
+--info-field gnomadG_FILTER \
+--info-field gnomadG_nonpar \
+--info-field gnomadG_n_alt_alleles \
+--info-field gnomadG_AC_popmax \
+--info-field gnomadG_AN_popmax \
+--info-field gnomadG_AF_popmax \
+--info-field gnomadG_nhomalt_popmax \
+--info-field gnomadG_non_topmed_popmax \
+--info-field gnomadG_non_topmed_AC_popmax \
+--info-field gnomadG_non_topmed_AN_popmax \
+--info-field gnomadG_non_topmed_AF_popmax \
+--info-field gnomadG_non_topmed_nhomalt_popmax \
+--info-field gnomadG_controls_popmax \
+--info-field gnomadG_controls_AC_popmax \
+--info-field gnomadG_controls_AN_popmax \
+--info-field gnomadG_controls_AF_popmax \
+--info-field gnomadG_controls_nhomalt_popmax \
+--info-field UK10K_AC_twins \
+--info-field UK10K_AN_twins \
+--info-field UK10K_AF_twins \
+--info-field UK10K_AC_alspac \
+--info-field UK10K_AN_alspac \
+--info-field UK10K_AF_alspac \
+--info-field UK10K_ID \
+--info-field spliceai \
+--info-field spliceai_filter \
+--info-field cadd_raw \
+--info-field cadd_phred \
+--info-field fathmmXF_coding \
+--info-field fathmmXF_noncoding \
+--info-field REVEL_score \
+--info-field REVEL_AA_REF \
+--info-field REVEL_AA_ALT \
+--info-field Reg_region_type \
+--info-field Reg_region_osteoblasts \
+--info-field Pfam_domain \
+--info-field ccr_pct \
+--info-field ccr_gene \
+--info-field clinvar_suspect_variants \
+--info-field clinvar_sig \
+--info-field clinvar_origin \
+--info-field clinvar_dis_name \
+--info-field clinvar_dis_anno \
+--info-field clinvar_gene_info \
+--info-field clinvar_rsID \
+--gene-description /share/ScratchGeneral/scoyou/projects/andreas_OImin/gnomad_slivar/pli.lookup \
+| bgzip > /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar.tsv.gz
+
+# Subsets slivar annotated variants to those associated with genes in the nosology of skeletal genetic disorders
+zcat /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar.vcf.gz | grep -Ff /share/ScratchGeneral/scoyou/projects/andreas_OImin/skeletal_dysplasia_lists/Nosology_2019_list.txt | bgzip > /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_nosology_variants_slivar.vcf.gz
+
+# Converts nosology variants to tsv, subsets to those that are rare (gnomad MAF < 0.01, or < 2 homs)
+/share/ScratchGeneral/scoyou/local/bin/slivar/slivar tsv /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_nosology_variants_slivar.vcf.gz \
+--ped /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_ped.txt \
+--csq-field CSQ \
+--sample-field hq_rare \
+--sample-field trio_hq_rare \
+--info-field filter_pass \
+--info-field not_problematic \
+--info-field impactful_variants \
+--info-field hq_all \
+--info-field hq_affected \
+--info-field rare \
+--info-field rare_ch \
+--info-field hq_rare \
+--info-field hq_rare_ch \
+--info-field hq_rare_impactful \
+--info-field hq_rare_ch_impactful \
+--info-field affected_auto_dominant \
+--info-field affected_auto_recessive \
+--info-field affected_x_dominant \
+--info-field affected_x_recessive \
+--info-field trio_rare \
+--info-field trio_interesting \
+--info-field trio_hq_rare \
+--info-field trio_hq_rare_impactful \
+--info-field trio_hq_rare_interesting \
+--info-field trio_hq_rare_impactful_interesting \
+--info-field trio_denovo \
+--info-field trio_autosomal_dominant \
+--info-field trio_autosomal_recessive \
+--info-field trio_uniparent_disomy \
+--info-field trio_x_recessive \
+--info-field trio_lenient_denovo \
+--info-field trio_lenient_ar \
+--info-field CSQ \
+--info-field gnomad_popmax_af \
+--info-field gnomad_popmax_af_filter \
+--info-field gnomad_nhomalt \
+--info-field gnomad_nhomalt_filter \
+--info-field gnomad_popmax_af_controls \
+--info-field gnomad_popmax_af_controls_filter \
+--info-field gnomad_nhomalt_controls \
+--info-field gnomad_nhomalt_controls_filter \
+--info-field gnomadG_FILTER \
+--info-field gnomadG_nonpar \
+--info-field gnomadG_n_alt_alleles \
+--info-field gnomadG_AC_popmax \
+--info-field gnomadG_AN_popmax \
+--info-field gnomadG_AF_popmax \
+--info-field gnomadG_nhomalt_popmax \
+--info-field gnomadG_non_topmed_popmax \
+--info-field gnomadG_non_topmed_AC_popmax \
+--info-field gnomadG_non_topmed_AN_popmax \
+--info-field gnomadG_non_topmed_AF_popmax \
+--info-field gnomadG_non_topmed_nhomalt_popmax \
+--info-field gnomadG_controls_popmax \
+--info-field gnomadG_controls_AC_popmax \
+--info-field gnomadG_controls_AN_popmax \
+--info-field gnomadG_controls_AF_popmax \
+--info-field gnomadG_controls_nhomalt_popmax \
+--info-field UK10K_AC_twins \
+--info-field UK10K_AN_twins \
+--info-field UK10K_AF_twins \
+--info-field UK10K_AC_alspac \
+--info-field UK10K_AN_alspac \
+--info-field UK10K_AF_alspac \
+--info-field UK10K_ID \
+--info-field spliceai \
+--info-field spliceai_filter \
+--info-field cadd_raw \
+--info-field cadd_phred \
+--info-field fathmmXF_coding \
+--info-field fathmmXF_noncoding \
+--info-field REVEL_score \
+--info-field REVEL_AA_REF \
+--info-field REVEL_AA_ALT \
+--info-field Reg_region_type \
+--info-field Reg_region_osteoblasts \
+--info-field Pfam_domain \
+--info-field ccr_pct \
+--info-field ccr_gene \
+--info-field clinvar_suspect_variants \
+--info-field clinvar_sig \
+--info-field clinvar_origin \
+--info-field clinvar_dis_name \
+--info-field clinvar_dis_anno \
+--info-field clinvar_gene_info \
+--info-field clinvar_rsID \
+--gene-description /share/ScratchGeneral/scoyou/projects/andreas_OImin/gnomad_slivar/pli.lookup \
+| bgzip > /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_nosology_variants_slivar.tsv.gz
+
+# Identifies compount hets in slivar annotated variants. Note: subsets variants based on filters established in intial slivar run.
+/share/ScratchGeneral/scoyou/local/bin/slivar/slivar compound-hets \
+--vcf /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar.vcf.gz \
+--ped /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_ped.txt \
+--sample-field hq_rare_ch_impactful \
+--allow-non-trios \
+| bgzip > /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar_comp-hets_family.vcf.gz
+
+# Converts comphet variants to tsv
+/share/ScratchGeneral/scoyou/local/bin/slivar/slivar tsv /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar_comp-hets_family.vcf.gz \
+--ped /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_ped.txt \
+--csq-field CSQ \
+--sample-field hq_rare_ch \
+--info-field filter_pass \
+--info-field not_problematic \
+--info-field impactful_variants \
+--info-field hq_all \
+--info-field hq_affected \
+--info-field rare \
+--info-field rare_ch \
+--info-field hq_rare \
+--info-field hq_rare_ch \
+--info-field hq_rare_impactful \
+--info-field hq_rare_ch_impactful \
+--info-field affected_auto_dominant \
+--info-field affected_auto_recessive \
+--info-field affected_x_dominant \
+--info-field affected_x_recessive \
+--info-field trio_rare \
+--info-field trio_interesting \
+--info-field trio_hq_rare \
+--info-field trio_hq_rare_impactful \
+--info-field trio_hq_rare_interesting \
+--info-field trio_hq_rare_impactful_interesting \
+--info-field trio_denovo \
+--info-field trio_autosomal_dominant \
+--info-field trio_autosomal_recessive \
+--info-field trio_uniparent_disomy \
+--info-field trio_x_recessive \
+--info-field trio_lenient_denovo \
+--info-field trio_lenient_ar \
+--info-field CSQ \
+--info-field gnomad_popmax_af \
+--info-field gnomad_popmax_af_filter \
+--info-field gnomad_nhomalt \
+--info-field gnomad_nhomalt_filter \
+--info-field gnomad_popmax_af_controls \
+--info-field gnomad_popmax_af_controls_filter \
+--info-field gnomad_nhomalt_controls \
+--info-field gnomad_nhomalt_controls_filter \
+--info-field gnomadG_FILTER \
+--info-field gnomadG_nonpar \
+--info-field gnomadG_n_alt_alleles \
+--info-field gnomadG_AC_popmax \
+--info-field gnomadG_AN_popmax \
+--info-field gnomadG_AF_popmax \
+--info-field gnomadG_nhomalt_popmax \
+--info-field gnomadG_non_topmed_popmax \
+--info-field gnomadG_non_topmed_AC_popmax \
+--info-field gnomadG_non_topmed_AN_popmax \
+--info-field gnomadG_non_topmed_AF_popmax \
+--info-field gnomadG_non_topmed_nhomalt_popmax \
+--info-field gnomadG_controls_popmax \
+--info-field gnomadG_controls_AC_popmax \
+--info-field gnomadG_controls_AN_popmax \
+--info-field gnomadG_controls_AF_popmax \
+--info-field gnomadG_controls_nhomalt_popmax \
+--info-field UK10K_AC_twins \
+--info-field UK10K_AN_twins \
+--info-field UK10K_AF_twins \
+--info-field UK10K_AC_alspac \
+--info-field UK10K_AN_alspac \
+--info-field UK10K_AF_alspac \
+--info-field UK10K_ID \
+--info-field spliceai \
+--info-field spliceai_filter \
+--info-field cadd_raw \
+--info-field cadd_phred \
+--info-field fathmmXF_coding \
+--info-field fathmmXF_noncoding \
+--info-field REVEL_score \
+--info-field REVEL_AA_REF \
+--info-field REVEL_AA_ALT \
+--info-field Reg_region_type \
+--info-field Reg_region_osteoblasts \
+--info-field Pfam_domain \
+--info-field ccr_pct \
+--info-field ccr_gene \
+--info-field clinvar_suspect_variants \
+--info-field clinvar_sig \
+--info-field clinvar_origin \
+--info-field clinvar_dis_name \
+--info-field clinvar_dis_anno \
+--info-field clinvar_gene_info \
+--info-field clinvar_rsID \
+--gene-description /share/ScratchGeneral/scoyou/projects/andreas_OImin/gnomad_slivar/pli.lookup \
+| bgzip > /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar_comp-hets_family.tsv.gz
+
+# Identifies compount hets in slivar annotated variants. Note: subsets variants based on filters established in intial slivar run.
+/share/ScratchGeneral/scoyou/local/bin/slivar/slivar compound-hets \
+--vcf /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar.vcf.gz \
+--ped /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_ped.txt \
+--sample-field trio_lenient_denovo \
+--sample-field trio_lenient_ar \
+| bgzip > /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar_comp-hets_trio.vcf.gz
+
+# Converts comphet variants to tsv
+/share/ScratchGeneral/scoyou/local/bin/slivar/slivar tsv /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar_comp-hets_trio.vcf.gz \
+--ped /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_ped.txt \
+--csq-field CSQ \
+--sample-field trio_lenient_denovo \
+--sample-field trio_lenient_ar \
+--info-field filter_pass \
+--info-field not_problematic \
+--info-field impactful_variants \
+--info-field hq_all \
+--info-field hq_affected \
+--info-field rare \
+--info-field rare_ch \
+--info-field hq_rare \
+--info-field hq_rare_ch \
+--info-field hq_rare_impactful \
+--info-field hq_rare_ch_impactful \
+--info-field affected_auto_dominant \
+--info-field affected_auto_recessive \
+--info-field affected_x_dominant \
+--info-field affected_x_recessive \
+--info-field trio_rare \
+--info-field trio_interesting \
+--info-field trio_hq_rare \
+--info-field trio_hq_rare_impactful \
+--info-field trio_hq_rare_interesting \
+--info-field trio_hq_rare_impactful_interesting \
+--info-field trio_denovo \
+--info-field trio_autosomal_dominant \
+--info-field trio_autosomal_recessive \
+--info-field trio_uniparent_disomy \
+--info-field trio_x_recessive \
+--info-field trio_lenient_denovo \
+--info-field trio_lenient_ar \
+--info-field CSQ \
+--info-field gnomad_popmax_af \
+--info-field gnomad_popmax_af_filter \
+--info-field gnomad_nhomalt \
+--info-field gnomad_nhomalt_filter \
+--info-field gnomad_popmax_af_controls \
+--info-field gnomad_popmax_af_controls_filter \
+--info-field gnomad_nhomalt_controls \
+--info-field gnomad_nhomalt_controls_filter \
+--info-field gnomadG_FILTER \
+--info-field gnomadG_nonpar \
+--info-field gnomadG_n_alt_alleles \
+--info-field gnomadG_AC_popmax \
+--info-field gnomadG_AN_popmax \
+--info-field gnomadG_AF_popmax \
+--info-field gnomadG_nhomalt_popmax \
+--info-field gnomadG_non_topmed_popmax \
+--info-field gnomadG_non_topmed_AC_popmax \
+--info-field gnomadG_non_topmed_AN_popmax \
+--info-field gnomadG_non_topmed_AF_popmax \
+--info-field gnomadG_non_topmed_nhomalt_popmax \
+--info-field gnomadG_controls_popmax \
+--info-field gnomadG_controls_AC_popmax \
+--info-field gnomadG_controls_AN_popmax \
+--info-field gnomadG_controls_AF_popmax \
+--info-field gnomadG_controls_nhomalt_popmax \
+--info-field UK10K_AC_twins \
+--info-field UK10K_AN_twins \
+--info-field UK10K_AF_twins \
+--info-field UK10K_AC_alspac \
+--info-field UK10K_AN_alspac \
+--info-field UK10K_AF_alspac \
+--info-field UK10K_ID \
+--info-field spliceai \
+--info-field spliceai_filter \
+--info-field cadd_raw \
+--info-field cadd_phred \
+--info-field fathmmXF_coding \
+--info-field fathmmXF_noncoding \
+--info-field REVEL_score \
+--info-field REVEL_AA_REF \
+--info-field REVEL_AA_ALT \
+--info-field Reg_region_type \
+--info-field Reg_region_osteoblasts \
+--info-field Pfam_domain \
+--info-field ccr_pct \
+--info-field ccr_gene \
+--info-field clinvar_suspect_variants \
+--info-field clinvar_sig \
+--info-field clinvar_origin \
+--info-field clinvar_dis_name \
+--info-field clinvar_dis_anno \
+--info-field clinvar_gene_info \
+--info-field clinvar_rsID \
+--gene-description /share/ScratchGeneral/scoyou/projects/andreas_OImin/gnomad_slivar/pli.lookup \
+| bgzip > /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_decomp_norm_VEP_vcfanno_slivar_comp-hets_trio.tsv.gz
+' > '/share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_slivar_script.sh'
+chmod 755 '/share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_slivar_script.sh'
+qsub -P OsteoporosisandTranslationalResearch -N $i'_slivar' -wd /share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/logs/ -b y -j y -R y -l mem_requested=8G -pe smp 3 -V -m bea -M s.youlten@garvan.org.au -V '/share/ScratchGeneral/scoyou/projects/andreas_OImin/input_vcfs/ALL_SAMPLES/'$i'/'$i'_slivar_script.sh'
+done;
